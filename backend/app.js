@@ -5,26 +5,28 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
+const cors = require('cors');
 
 const Goal = require('./models/goal');
 
 const app = express();
 
+app.use(cors());
+app.use(morgan('combined', { stream: accessLogStream }));
+app.use(bodyParser.json());
+
+// app.use((req, res, next) => {
+//   res.setHeader('Access-Control-Allow-Origin', '*');
+//   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
+//   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+//   next();
+// });
+
+
 const accessLogStream = fs.createWriteStream(
   path.join(__dirname, 'logs', 'access.log'),
   { flags: 'a' }
 );
-
-app.use(morgan('combined', { stream: accessLogStream }));
-
-app.use(bodyParser.json());
-
-app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  next();
-});
 
 app.get('/goals', async (req, res) => {
   console.log('TRYING TO FETCH GOALS');
@@ -83,19 +85,17 @@ app.delete('/goals/:id', async (req, res) => {
   }
 });
 
-mongoose.connect(
-  'mongodb://localhost:27017/course-goals',
-  {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  },
-  (err) => {
-    if (err) {
-      console.error('FAILED TO CONNECT TO MONGODB');
-      console.error(err);
-    } else {
-      console.log('CONNECTED TO MONGODB');
-      app.listen(80);
-    }
+const startServer = async () => {
+  try {
+    await mongoose.connect('mongodb://localhost:27017/course-goals');
+    console.log('CONNECTED TO MONGODB');
+    app.listen(3005, () => {
+      console.log('Server is running on port 3005');
+    });
+  } catch (err) {
+    console.error('FAILED TO CONNECT TO MONGODB');
+    console.error(err);
   }
-);
+};
+
+startServer();

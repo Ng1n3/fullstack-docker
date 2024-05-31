@@ -1,3 +1,5 @@
+import './Card.css'
+
 function LoadingSpinner({ children }) {
   return <div className="card">{children}</div>;
 }
