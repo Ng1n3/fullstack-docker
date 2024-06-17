@@ -22,6 +22,9 @@ app.use(express.json());
 //   next();
 // });
 
+
+
+
 const accessLogStream = fs.createWriteStream(
   path.join(__dirname, "logs", "access.log"),
   { flags: "a" }
@@ -88,7 +91,12 @@ app.delete("/goals/:id", async (req, res) => {
 
 const startServer = async () => {
   try {
-    await mongoose.connect("mongodb://host.docker.internal:27017/course-goals");
+    await mongoose.connect(
+      "mongodb://mongodb:27017/course-goals",
+      {
+        directConnection: true,
+      }
+    );
     console.log("CONNECTED TO MONGODB");
     app.listen(3005, () => {
       console.log("Server is running on port 3005");
